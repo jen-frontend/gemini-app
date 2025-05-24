@@ -18,6 +18,7 @@ module.exports = {
         exclude: /node_modules/,
         use: "babel-loader",
       },
+      // module css 활성화 및 스타일링 관련 설정
       {
         test: /\.css$/,
         use: [
