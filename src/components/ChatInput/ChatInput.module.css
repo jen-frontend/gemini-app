@@ -1,0 +1,57 @@
+.chatInputWrapper {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  max-width: 80vw;
+  width: 50vw;
+  padding: 14px;
+  border-radius: 10px;
+  gap: 10px;
+}
+
+.chatInput {
+  flex: 1;
+  height: 60px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: #333;
+  color: #fff;
+  resize: none;
+  border: 1px solid #575757;
+  font-family: sans-serif;
+}
+
+.chatInput::placeholder {
+  color: #888;
+}
+
+.sendButton {
+  width: 48px;
+  height: 48px;
+  background-color: #173665; /* 버튼 배경색 */
+  color: #fff; /* 버튼 텍스트 색상 */
+  border: none;
+  border-radius: 50%; /* 둥근 모서리 */
+  cursor: pointer;
+  display: flex; /* 플렉스 컨테이너로 설정 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+}
+
+.sendButton:hover {
+  background-color: #1e4785;
+}
+
+.sendButton:disabled {
+  opacity: 50%;
+  cursor: not-allowed;
+}
+
+.sendIcon {
+  width: 20px;
+  height: 20px;
+}

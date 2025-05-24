@@ -1,0 +1,32 @@
+.sidebar {
+  width: 240px;
+  background-color: #282a2c;
+  padding: 14px;
+  font-size: 16px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.navItem {
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.chatList {
+  padding: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: light;
+}
+
+.navItem:hover,
+.chatList:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.active {
+  background-color: #243a5c;
+  border-radius: 8px;
+}

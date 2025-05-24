@@ -1,9 +1,11 @@
 import React from "react";
+import * as styles from "./Header.module.css";
 
 export default function Header() {
   return (
-    <div style={{ border: "1px solid white", width: "100%", height: "64px" }}>
-      Header
+    <div className={styles.header}>
+      <div className={styles.logo}>Gemini App</div>
+      <div className={styles.profile}>Profile</div>
     </div>
   );
 }

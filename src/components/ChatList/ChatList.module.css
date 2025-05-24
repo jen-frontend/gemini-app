@@ -1,0 +1,21 @@
+.chatList {
+  padding: 14px;
+  overflow-y: auto;
+  height: calc(100vh - 120px);
+  max-width: 80vw;
+  width: 50vw;
+  margin: 0 auto;
+}
+
+.chatMessage {
+  margin-bottom: 14px;
+  padding: 8px;
+  border-radius: 8px;
+  max-width: 75%;
+}
+
+.chatMessage.sent {
+  background-color: #333537;
+  max-width: 75%;
+  margin-left: auto;
+}
