@@ -9,7 +9,7 @@ const port = process.env.PORT || 3001;
 app.use("/api", chatRouter);
 app.use("/api", geminiStreamRouter);
 app.get("/api/hello", (req, res) => {
-  res.send("Hello World!");
+  res.json({ message: "hello react" });
 });
 
 app.listen(port, () => {

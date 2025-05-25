@@ -1,5 +1,15 @@
+const dotenv = require("dotenv");
+const webpack = require("webpack");
+
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+dotenv.config();
+
+const envKeys = Object.keys(process.env).reduce((prev, next) => {
+  prev[`process.env.${next}`] = JSON.stringify(process.env[next]);
+  return prev;
+}, {});
 
 module.exports = {
   entry: "./src/index.tsx",
@@ -37,6 +47,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./public/index.html",
     }),
+    new webpack.DefinePlugin(envKeys),
   ],
   devServer: {
     static: {
@@ -44,5 +55,13 @@ module.exports = {
     },
     compress: true,
     port: 8080,
+    proxy: [
+      {
+        context: ["/api"],
+        target: process.env.REACT_APP_SERVER_URL,
+        secure: false,
+        changeOrigin: true,
+      },
+    ],
   },
 };
