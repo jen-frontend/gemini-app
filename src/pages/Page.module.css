@@ -1,0 +1,11 @@
+.wrapper {
+  display: flex;
+  height: 100vh;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+}

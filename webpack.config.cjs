@@ -55,6 +55,7 @@ module.exports = {
     },
     compress: true,
     port: 8080,
+    historyApiFallback: true,
     proxy: [
       {
         context: ["/api"],
