@@ -6,8 +6,16 @@ const router = express.Router();
 router.post("/chat", async (req, res) => {
   try {
     const { prompt } = req.body;
+    // 첫번째 콘솔
+    console.log("prompt: ", prompt);
+
+    if (!prompt) return;
+
     const response = await getGeminiResponse(prompt);
-    console.log(response);
+
+    // 세번째 콘솔
+    console.log("response :", response);
+
     res.json({ response });
   } catch (error) {
     console.error("Error: ", error);

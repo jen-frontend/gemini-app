@@ -7,7 +7,10 @@ export async function getGeminiResponse(prompt: string) {
     model: "gemini-2.0-flash",
     contents: prompt,
   });
+  // 두번째 콘솔
   console.log(response.text);
+
+  return response.text;
 }
 
 export async function streamGeminiResponse(
