@@ -6,14 +6,12 @@ import * as styles from "./ChatInput.module.css";
 
 export default function ChatInput() {
   const [input, setInput] = useState<string>("");
-  const { addMessage, messages } = useChatStore();
+  const { addMessage, messages, setLoading } = useChatStore();
 
   console.log(messages, " 전역 상태 메세지 배열");
 
   const handleSend = async () => {
     if (!input.trim()) return; // 빈 메세지 방지
-
-    console.log("Sending message: ", input);
 
     // 사용자 메세지 생성
     const userMessage: Message = {
@@ -24,6 +22,9 @@ export default function ChatInput() {
 
     // 사용자 메세지 전역상태 추가
     addMessage(userMessage);
+
+    // 요청 시작: 로딩 상태 활성화
+    setLoading(true);
 
     try {
       const response = await fetch("/api/chat", {
@@ -37,8 +38,6 @@ export default function ChatInput() {
       }
 
       const { response: aiResponse } = await response.json();
-
-      console.log(aiResponse);
 
       // 어시스턴스 메세지 생성
       const assistantMessage: Message = {
@@ -61,6 +60,8 @@ export default function ChatInput() {
       addMessage(errorMessage);
     } finally {
       setInput("");
+      // 요청 종료
+      setLoading(false);
     }
   };
 
