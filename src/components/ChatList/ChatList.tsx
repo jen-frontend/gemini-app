@@ -8,9 +8,16 @@ import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { MarkdownCodeBlock } from "./MarkdownCodeBlock";
 
-export default function ChatList() {
-  const { messages, loading } = useChatStore();
+interface ChatListProps {
+  threadId: number;
+}
+
+export default function ChatList({ threadId }: ChatListProps) {
+  const { threads, loading } = useChatStore();
   const messageEndRef = useRef<HTMLDivElement>(null);
+
+  // threadId에 맞는 메세지 가져오기
+  const messages = threads[threadId] || [];
 
   const scrollToBottom = () => {
     messageEndRef?.current?.scrollIntoView({ behavior: "smooth" });

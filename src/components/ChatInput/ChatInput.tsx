@@ -3,12 +3,19 @@ import { AiOutlineSend } from "react-icons/ai";
 import { useChatStore, Message } from "../../store/chatStore";
 
 import * as styles from "./ChatInput.module.css";
+import { useLocation, useNavigate } from "react-router-dom";
 
-export default function ChatInput() {
+interface ChatInputProps {
+  threadId: number;
+}
+
+export default function ChatInput({ threadId }: ChatInputProps) {
   const [input, setInput] = useState<string>("");
-  const { addMessage, messages, setLoading } = useChatStore();
+  const { threads, setThreadMessages, messages, setLoading } = useChatStore();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  console.log(messages, " 전역 상태 메세지 배열");
+  const currentThreadMessage = threads[threadId] || [];
 
   const handleSend = async () => {
     if (!input.trim()) return; // 빈 메세지 방지
@@ -21,7 +28,8 @@ export default function ChatInput() {
     };
 
     // 사용자 메세지 전역상태 추가
-    addMessage(userMessage);
+    const updatedMessages = [...currentThreadMessage, userMessage];
+    setThreadMessages(threadId, updatedMessages);
 
     // 요청 시작: 로딩 상태 활성화
     setLoading(true);
@@ -47,7 +55,7 @@ export default function ChatInput() {
       };
 
       // 전역 상태에 어시스턴스 메세지 추가
-      addMessage(assistantMessage);
+      setThreadMessages(threadId, [...updatedMessages, assistantMessage]);
     } catch (error) {
       console.error("Error sending message: ", error);
       // 에러 발생시 에러 메세지 추가
@@ -57,11 +65,16 @@ export default function ChatInput() {
         text: "문제가 생겼습니다. 다시 시도해주세요",
       };
       // 전역 상태에 에러 메세지 추가
-      addMessage(errorMessage);
+      setThreadMessages(threadId, [...updatedMessages, errorMessage]);
     } finally {
       setInput("");
       // 요청 종료
       setLoading(false);
+
+      // 현재 경로가 루트 ("/"), 새 스레드 상세 페이지 (chatList) 라우팅
+      if (location.pathname === "/") {
+        navigate(`/chats/${threadId}`);
+      }
     }
   };
 
