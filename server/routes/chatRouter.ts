@@ -5,13 +5,13 @@ const router = express.Router();
 
 router.post("/chat", async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, modelParameters, messages } = req.body;
     // 첫번째 콘솔
     console.log("prompt: ", prompt);
 
     if (!prompt) return;
 
-    const response = await getGeminiResponse(prompt);
+    const response = await getGeminiResponse(prompt, messages, modelParameters);
 
     // 세번째 콘솔
     console.log("response :", response);

@@ -2,15 +2,50 @@ import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY! });
 
-export async function getGeminiResponse(prompt: string) {
-  const response = await genAI.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: prompt,
-  });
-  // 두번째 콘솔
-  console.log(response.text);
+export interface ChatMessage {
+  role: "user" | "assistant";
+  text: string;
+}
 
-  return response.text;
+interface GenerationConfig {
+  maxOutputTokens: number;
+  temperature: number;
+  topP: number;
+  topK: number;
+  candidateCount: number;
+}
+
+export async function getGeminiResponse(
+  prompt: string,
+  messages?: ChatMessage[],
+  modelParameters?: GenerationConfig
+) {
+  // 이전 대화 내역을 history 배열로 파싱
+  const history =
+    messages?.map((msg: ChatMessage) => ({
+      role: msg.role === "user" ? "user" : "model",
+      parts: [{ text: msg.text }],
+    })) || [];
+
+  // 마지막 호출된 prompt 추가
+  history.push({ role: "user", parts: [{ text: prompt }] });
+
+  // 대화 세션 생성
+  const chat = genAI.chats.create({
+    model: "gemini-2.0-flash",
+    history,
+    config: modelParameters,
+  });
+
+  try {
+    const response = await chat.sendMessage({
+      message: prompt,
+    });
+    return response.text!;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 export async function streamGeminiResponse(

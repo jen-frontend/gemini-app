@@ -34,11 +34,23 @@ export default function ChatInput({ threadId }: ChatInputProps) {
     // 요청 시작: 로딩 상태 활성화
     setLoading(true);
 
+    const payload = {
+      prompt: input,
+      messages: updatedMessages,
+      modelParameters: {
+        maxOutputTokens: 2048,
+        temperature: 0.3,
+        topP: 0.1,
+        topK: 1,
+        candidateCount: 1,
+      },
+    };
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
