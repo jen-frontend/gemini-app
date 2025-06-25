@@ -11,7 +11,8 @@ interface ChatInputProps {
 
 export default function ChatInput({ threadId }: ChatInputProps) {
   const [input, setInput] = useState<string>("");
-  const { threads, setThreadMessages, messages, setLoading } = useChatStore();
+  const { threads, setThreadMessages, messages, setLoading, loading } =
+    useChatStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,6 +35,18 @@ export default function ChatInput({ threadId }: ChatInputProps) {
     // 요청 시작: 로딩 상태 활성화
     setLoading(true);
 
+    // 어시스턴트의 스트리밍 응답을 받을 자리 확보
+    const placeholderAssistantMessage: Message = {
+      id: Date.now() + 1,
+      role: "assistant",
+      text: "",
+    };
+
+    setThreadMessages(threadId, [
+      ...updatedMessages,
+      placeholderAssistantMessage,
+    ]);
+
     const payload = {
       prompt: input,
       messages: updatedMessages,
@@ -46,48 +59,125 @@ export default function ChatInput({ threadId }: ChatInputProps) {
       },
     };
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    // 일반 chat 호출 api
+    // try {
+    //   const response = await fetch("/api/chat", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(payload),
+    //   });
 
-      if (!response.ok) {
-        throw new Error("Response not ko");
+    //   if (!response.ok) {
+    //     throw new Error("Response not ko");
+    //   }
+
+    //   const { response: aiResponse } = await response.json();
+
+    //   // 어시스턴스 메세지 생성
+    //   const assistantMessage: Message = {
+    //     id: Date.now() + 1,
+    //     role: "assistant",
+    //     text: aiResponse,
+    //   };
+
+    //   // 전역 상태에 어시스턴스 메세지 추가
+    //   setThreadMessages(threadId, [...updatedMessages, assistantMessage]);
+    // } catch (error) {
+    //   console.error("Error sending message: ", error);
+    //   // 에러 발생시 에러 메세지 추가
+    //   const errorMessage: Message = {
+    //     id: Date.now() + 1,
+    //     role: "assistant",
+    //     text: "문제가 생겼습니다. 다시 시도해주세요",
+    //   };
+    //   // 전역 상태에 에러 메세지 추가
+    //   setThreadMessages(threadId, [...updatedMessages, errorMessage]);
+    // } finally {
+    //   setInput("");
+    //   // 요청 종료
+    //   setLoading(false);
+
+    //   // 현재 경로가 루트 ("/"), 새 스레드 상세 페이지 (chatList) 라우팅
+    //   if (location.pathname === "/") {
+    //     navigate(`/chats/${threadId}`);
+    //   }
+    // }
+
+    const fetchStreamData = async () => {
+      try {
+        const headerConfig = {
+          Accept: "text/event-stream, text/plain",
+          "Content-Type": "application/json",
+        };
+
+        const response = await fetch("/api/gemini-stream", {
+          method: "POST",
+          headers: headerConfig,
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.body) {
+          throw new Error("Error");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (reader) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const rawData = line.slice(6).trim();
+              if (rawData === "[DONE]") break;
+
+              try {
+                const data = JSON.parse(rawData);
+                // 최신 스레드 상태 가져오기
+                const currentThread =
+                  useChatStore.getState().threads[threadId] || [];
+                const updatedThread = currentThread.map((msg, idx) => {
+                  if (
+                    msg.role === "assistant" &&
+                    idx === currentThread.length - 1
+                  ) {
+                    // 스트리밍 데이터 누적 업데이트
+                    return { ...msg, text: msg.text + data.text };
+                  }
+                  return msg;
+                });
+
+                setThreadMessages(threadId, updatedThread);
+              } catch (err) {
+                console.error("JSON parsing error: ", err);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // 일반 에러처리
+        const errorMsg: Message = {
+          id: Date.now() + 1,
+          role: "assistant",
+          text: "문제가 생겼습니다. 다시 시도해주세요",
+        };
+        setThreadMessages(threadId, [...updatedMessages, errorMsg]);
+      } finally {
+        setInput("");
+        setLoading(false);
+        // 현재 경로가 메인 페이지인 경우, 상세 chat으로 라우팅
+        if (location.pathname === "/") {
+          navigate(`/chats/${threadId}`);
+        }
       }
+    };
 
-      const { response: aiResponse } = await response.json();
-
-      // 어시스턴스 메세지 생성
-      const assistantMessage: Message = {
-        id: Date.now() + 1,
-        role: "assistant",
-        text: aiResponse,
-      };
-
-      // 전역 상태에 어시스턴스 메세지 추가
-      setThreadMessages(threadId, [...updatedMessages, assistantMessage]);
-    } catch (error) {
-      console.error("Error sending message: ", error);
-      // 에러 발생시 에러 메세지 추가
-      const errorMessage: Message = {
-        id: Date.now() + 1,
-        role: "assistant",
-        text: "문제가 생겼습니다. 다시 시도해주세요",
-      };
-      // 전역 상태에 에러 메세지 추가
-      setThreadMessages(threadId, [...updatedMessages, errorMessage]);
-    } finally {
-      setInput("");
-      // 요청 종료
-      setLoading(false);
-
-      // 현재 경로가 루트 ("/"), 새 스레드 상세 페이지 (chatList) 라우팅
-      if (location.pathname === "/") {
-        navigate(`/chats/${threadId}`);
-      }
-    }
+    // SSE 스트리밍 시작
+    fetchStreamData();
   };
 
   return (
@@ -98,7 +188,11 @@ export default function ChatInput({ threadId }: ChatInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
       />
-      <button onClick={handleSend} className={styles.sendButton}>
+      <button
+        onClick={handleSend}
+        className={styles.sendButton}
+        disabled={loading}
+      >
         <AiOutlineSend className={styles.sendIcon} />
       </button>
     </div>

@@ -50,16 +50,40 @@ export async function getGeminiResponse(
 
 export async function streamGeminiResponse(
   prompt: string,
-  onText: (text?: string) => Promise<void> | void
+  onText: (text?: string) => Promise<void> | void,
+  messages: ChatMessage[] | [],
+  modelParameters?: GenerationConfig
 ) {
-  const reponse = await genAI.models.generateContentStream({
+  // 이전 대화 내역을 history 배열로 파싱
+  const history =
+    messages?.map((msg: ChatMessage) => ({
+      role: msg.role === "user" ? "user" : "model",
+      parts: [{ text: msg.text }],
+    })) || [];
+
+  // 마지막 호출된 prompt 추가
+  history.push({ role: "user", parts: [{ text: prompt }] });
+
+  // 대화 세션 생성
+  const chat = genAI.chats.create({
     model: "gemini-2.0-flash",
-    contents: prompt,
+    history,
+    config: modelParameters,
   });
 
-  for await (const chunk of reponse) {
-    console.log(chunk.text);
-    const chunkText = chunk.text;
-    await onText(chunkText);
+  try {
+    // 스트리밍 응답 호출
+    const stream = await chat.sendMessageStream({
+      message: prompt,
+    });
+
+    for await (const chunk of stream) {
+      console.log(chunk.text);
+      const chunkText: string = chunk.text!;
+      onText(chunkText);
+    }
+  } catch (error) {
+    console.error("Error in streamGeminiResponse: ", error);
+    throw error;
   }
 }

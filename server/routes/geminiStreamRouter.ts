@@ -11,10 +11,16 @@ router.post("/gemini-stream", async (req, res) => {
     Connection: "keep-alive",
   });
   try {
-    const { prompt } = req.body;
-    await streamGeminiResponse(prompt, async (text) => {
-      res.write(`data: ${JSON.stringify({ text })}\n\n`);
-    });
+    const { prompt, messages, modelParameters } = req?.body;
+    await streamGeminiResponse(
+      prompt,
+      async (text) => {
+        res.write(`data: ${JSON.stringify({ text })}\n\n`);
+        console.log(`data: ${JSON.stringify({ text })}\n\n`);
+      },
+      messages || [],
+      modelParameters
+    );
     res.write("data: [DONE]\n\n");
     res.end();
   } catch (error) {
