@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { AiOutlineSend } from "react-icons/ai";
+import { AiOutlineSend, AiOutlineStop } from "react-icons/ai";
 import { useChatStore, Message } from "../../store/chatStore";
+import { toast } from "react-toastify";
 
 import * as styles from "./ChatInput.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useStreamStore } from "../../store/streamStore";
 
 interface ChatInputProps {
   threadId: number;
@@ -13,6 +15,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
   const [input, setInput] = useState<string>("");
   const { threads, setThreadMessages, messages, setLoading, loading } =
     useChatStore();
+  const { setAbortController, abortController } = useStreamStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -104,6 +107,10 @@ export default function ChatInput({ threadId }: ChatInputProps) {
     // }
 
     const fetchStreamData = async () => {
+      // 새로운 AbortController 생성 및 streamStore에 저장
+      const controller = new AbortController();
+      setAbortController(controller);
+
       try {
         const headerConfig = {
           Accept: "text/event-stream, text/plain",
@@ -114,6 +121,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
           method: "POST",
           headers: headerConfig,
           body: JSON.stringify(payload),
+          signal: controller.signal,
         });
 
         if (!response.body) {
@@ -158,14 +166,18 @@ export default function ChatInput({ threadId }: ChatInputProps) {
             }
           }
         }
-      } catch (error) {
-        // 일반 에러처리
-        const errorMsg: Message = {
-          id: Date.now() + 1,
-          role: "assistant",
-          text: "문제가 생겼습니다. 다시 시도해주세요",
-        };
-        setThreadMessages(threadId, [...updatedMessages, errorMsg]);
+      } catch (error: any) {
+        if (error?.name === "AbortError") {
+          console.log("Streaming aborted: ", error);
+        } else {
+          // 일반 에러처리
+          const errorMsg: Message = {
+            id: Date.now() + 1,
+            role: "assistant",
+            text: "문제가 생겼습니다. 다시 시도해주세요",
+          };
+          setThreadMessages(threadId, [...updatedMessages, errorMsg]);
+        }
       } finally {
         setInput("");
         setLoading(false);
@@ -180,6 +192,15 @@ export default function ChatInput({ threadId }: ChatInputProps) {
     fetchStreamData();
   };
 
+  const handleStopAnswer = () => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      toast.info("답변이 중지되었습니다.");
+      console.log("Streaming aborted");
+    }
+  };
+
   return (
     <div className={styles.chatInputWrapper}>
       <textarea
@@ -188,13 +209,19 @@ export default function ChatInput({ threadId }: ChatInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
       />
-      <button
-        onClick={handleSend}
-        className={styles.sendButton}
-        disabled={loading}
-      >
-        <AiOutlineSend className={styles.sendIcon} />
-      </button>
+      {loading ? (
+        <button className={styles.sendButton} onClick={handleStopAnswer}>
+          <AiOutlineStop className={styles.sendIcon} />
+        </button>
+      ) : (
+        <button
+          onClick={handleSend}
+          className={styles.sendButton}
+          disabled={loading}
+        >
+          <AiOutlineSend className={styles.sendIcon} />
+        </button>
+      )}
     </div>
   );
 }
