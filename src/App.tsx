@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import TestPage from "./pages/TestPage";
 import { ToastContainer } from "react-toastify";
+import TestFirestorePage from "./pages/TestFirestorePage";
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/test" element={<TestPage />} />
+          <Route path="/test-firestore" element={<TestFirestorePage />} />
         </Routes>
       </Router>
       <ToastContainer
