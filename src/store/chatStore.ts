@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { saveThreadMessages } from "../firestoreUtils";
 
 export interface Message {
   id: number;
@@ -29,7 +30,8 @@ export const useChatStore = create<ChatState>((set) => ({
       const updateThreads = { ...state.threads, [threadId]: messages };
 
       // localStorage 저장
-      localStorage.setItem("chatThreads", JSON.stringify(updateThreads));
+      // localStorage.setItem("chatThreads", JSON.stringify(updateThreads));
+      saveThreadMessages(threadId, messages);
       return { threads: updateThreads };
     }),
   setLoading: (loading: boolean) => set({ loading }),
