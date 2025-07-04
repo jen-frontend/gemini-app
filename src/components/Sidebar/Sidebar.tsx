@@ -4,6 +4,10 @@ import * as styles from "./Sidebar.module.css";
 import cn from "classnames";
 import { Message } from "../../store/chatStore";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  getLatestChatThreads,
+  subscribeToChatThreads,
+} from "../../firestoreUtils";
 
 interface ChatThread {
   id: number;
@@ -17,23 +21,14 @@ export default function Sidebar() {
   const currentId = parseInt(id ?? "");
 
   useEffect(() => {
-    const stored = localStorage.getItem("chatThreads");
+    const unsubscribe = subscribeToChatThreads((threads) => {
+      // 최신 5개 가져오기
+      const latestThreads = getLatestChatThreads(threads);
+      // setChatList에 저장하기
+      setChatList(latestThreads);
+    });
 
-    if (!stored) return;
-
-    const threadsObj = Object.entries(
-      JSON.parse(stored) as Record<string, Message[]>
-    );
-
-    const threads = threadsObj
-      .map(([id, msg]) => ({
-        id: Number(id),
-        title: msg.find((m) => m.role === "user")?.text || "Untitled Chat",
-      }))
-      .sort((a, b) => b.id - a.id)
-      .slice(0, 5);
-
-    setChatList(threads);
+    return () => unsubscribe();
   }, []);
 
   return (

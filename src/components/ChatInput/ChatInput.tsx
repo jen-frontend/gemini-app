@@ -62,49 +62,10 @@ export default function ChatInput({ threadId }: ChatInputProps) {
       },
     };
 
-    // 일반 chat 호출 api
-    // try {
-    //   const response = await fetch("/api/chat", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(payload),
-    //   });
-
-    //   if (!response.ok) {
-    //     throw new Error("Response not ko");
-    //   }
-
-    //   const { response: aiResponse } = await response.json();
-
-    //   // 어시스턴스 메세지 생성
-    //   const assistantMessage: Message = {
-    //     id: Date.now() + 1,
-    //     role: "assistant",
-    //     text: aiResponse,
-    //   };
-
-    //   // 전역 상태에 어시스턴스 메세지 추가
-    //   setThreadMessages(threadId, [...updatedMessages, assistantMessage]);
-    // } catch (error) {
-    //   console.error("Error sending message: ", error);
-    //   // 에러 발생시 에러 메세지 추가
-    //   const errorMessage: Message = {
-    //     id: Date.now() + 1,
-    //     role: "assistant",
-    //     text: "문제가 생겼습니다. 다시 시도해주세요",
-    //   };
-    //   // 전역 상태에 에러 메세지 추가
-    //   setThreadMessages(threadId, [...updatedMessages, errorMessage]);
-    // } finally {
-    //   setInput("");
-    //   // 요청 종료
-    //   setLoading(false);
-
-    //   // 현재 경로가 루트 ("/"), 새 스레드 상세 페이지 (chatList) 라우팅
-    //   if (location.pathname === "/") {
-    //     navigate(`/chats/${threadId}`);
-    //   }
-    // }
+    // 현재 경로가 메인 페이지인 경우, 상세 chat으로 라우팅
+    if (location.pathname === "/") {
+      navigate(`/chats/${threadId}`);
+    }
 
     const fetchStreamData = async () => {
       // 새로운 AbortController 생성 및 streamStore에 저장
@@ -181,10 +142,6 @@ export default function ChatInput({ threadId }: ChatInputProps) {
       } finally {
         setInput("");
         setLoading(false);
-        // 현재 경로가 메인 페이지인 경우, 상세 chat으로 라우팅
-        if (location.pathname === "/") {
-          navigate(`/chats/${threadId}`);
-        }
       }
     };
 
