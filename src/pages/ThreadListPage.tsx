@@ -1,10 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import {
+  getAllChatThreads,
+  subscribeToChatThreads,
+  ThreadListItem,
+} from "../firestoreUtils";
+import Sidebar from "../components/Sidebar/Sidebar";
+import Header from "../components/Header/Header";
+import ThreadList from "../components/ThreadList/ThreadList";
 
 const ThreadListPage: React.FC = () => {
+  const [threadList, setThreadList] = useState<ThreadListItem[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToChatThreads((threads) => {
+      const allThreads = getAllChatThreads(threads);
+      setThreadList(allThreads);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <div>
-      <h1>스레드 리스트 페이지</h1>
-      <p>스레드 리스트가 들어갈 예정입니다.</p>
+    <div style={{ display: "flex", height: "100vh" }}>
+      <Sidebar />
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
+        <Header />
+        <ThreadList threads={threadList} />
+      </div>
     </div>
   );
 };

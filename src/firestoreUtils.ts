@@ -61,3 +61,37 @@ export async function getNextThreadId(): Promise<number> {
 
   return (Math.max(0, ...ids) || 0) + 1;
 }
+
+// 전체 스레드 데이터 가져오기
+export interface ThreadListItem {
+  id: number;
+  question: string;
+  answer: string;
+}
+
+export const getAllChatThreads = (
+  threads: Record<number, Message[]>
+): ThreadListItem[] => {
+  const threadArray: ThreadListItem[] = Object.entries(threads)
+    .map(([idStr, msgs]) => {
+      const id = Number(idStr);
+      if (isNaN(id)) return null;
+
+      let question = "";
+      let answer = "";
+
+      if (msgs.length > 0) {
+        const userMsg = msgs.find((msg) => msg.role === "user");
+        question = userMsg?.text ?? "질문이 없습니다";
+
+        const assistantMsg = msgs.find((msg) => msg.role === "assistant");
+        answer = assistantMsg?.text ?? "답변이 없습니다";
+      }
+
+      return { id, question, answer };
+    })
+    .filter((item) => item !== null)
+    .sort((a, b) => b!.id - a!.id);
+
+  return threadArray;
+};

@@ -21,7 +21,8 @@
 }
 
 .navItem:hover,
-.chatList:hover {
+.chatList:hover,
+.menuButton:hover {
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
 }
@@ -29,4 +30,20 @@
 .active {
   background-color: #243a5c;
   border-radius: 8px;
+}
+
+.collapsed {
+  width: 54px;
+}
+
+.menuButton {
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.menuIcon {
+  width: 18px;
+  height: 18px;
 }

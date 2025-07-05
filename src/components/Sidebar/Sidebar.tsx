@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import * as styles from "./Sidebar.module.css";
-
+import { AiOutlineMenu } from "react-icons/ai";
 import cn from "classnames";
-import { Message } from "../../store/chatStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   getLatestChatThreads,
   subscribeToChatThreads,
@@ -16,9 +15,13 @@ interface ChatThread {
 
 export default function Sidebar() {
   const [chatList, setChatList] = useState<ChatThread[]>([]);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const currentId = parseInt(id ?? "");
+  const currentPath = useLocation();
+
+  const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
   useEffect(() => {
     const unsubscribe = subscribeToChatThreads((threads) => {
@@ -32,28 +35,47 @@ export default function Sidebar() {
   }, []);
 
   return (
-    <div className={styles.sidebar}>
+    <div className={cn(styles.sidebar, { [styles.collapsed]: isCollapsed })}>
       <div
         role="presentation"
-        className={styles.navItem}
-        onClick={() => navigate("/")}
+        onClick={toggleSidebar}
+        className={styles.menuButton}
       >
-        New Chat
+        <AiOutlineMenu className={styles.menuIcon} />
       </div>
-      <div className={styles.navItem}>Chat List</div>
-      {chatList?.map((item, index) => (
-        <div
-          role="presentation"
-          key={item?.id}
-          className={cn(styles.chatList, {
-            [styles.active]: item.id === currentId,
-          })}
-          onClick={() => navigate(`/chats/${item.id}`)}
-        >
-          {item?.title}
-        </div>
-      ))}
-      <div className={styles.navItem}>Profile</div>
+      {!isCollapsed && (
+        <>
+          <div
+            role="presentation"
+            className={styles.navItem}
+            onClick={() => navigate("/")}
+          >
+            New Chat
+          </div>
+          <div
+            role="presentation"
+            className={cn(styles.navItem, {
+              [styles.active]: currentPath.pathname === "/threads",
+            })}
+            onClick={() => navigate("/threads")}
+          >
+            Chat List
+          </div>
+          {chatList?.map((item, index) => (
+            <div
+              role="presentation"
+              key={item?.id}
+              className={cn(styles.chatList, {
+                [styles.active]: item.id === currentId,
+              })}
+              onClick={() => navigate(`/chats/${item.id}`)}
+            >
+              {item?.title}
+            </div>
+          ))}
+          <div className={styles.navItem}>Profile</div>
+        </>
+      )}
     </div>
   );
 }
