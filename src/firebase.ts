@@ -1,5 +1,6 @@
 import { initializeApp, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -21,5 +22,7 @@ try {
 
 // Firestore db 인스턴스 생성
 const db = getFirestore(app);
+// Firebase auth 추가
+const auth = getAuth(app);
 
-export { db };
+export { db, auth };
