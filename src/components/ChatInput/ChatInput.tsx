@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import * as styles from "./ChatInput.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStreamStore } from "../../store/streamStore";
+import useAuth from "../../hooks/useAuth";
 
 interface ChatInputProps {
   threadId: number;
@@ -18,6 +19,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
   const { setAbortController, abortController } = useStreamStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const { uid } = useAuth();
 
   const currentThreadMessage = threads[threadId] || [];
 
@@ -33,7 +35,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
 
     // 사용자 메세지 전역상태 추가
     const updatedMessages = [...currentThreadMessage, userMessage];
-    setThreadMessages(threadId, updatedMessages);
+    setThreadMessages(uid, threadId, updatedMessages);
 
     // 요청 시작: 로딩 상태 활성화
     setLoading(true);
@@ -45,7 +47,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
       text: "",
     };
 
-    setThreadMessages(threadId, [
+    setThreadMessages(uid, threadId, [
       ...updatedMessages,
       placeholderAssistantMessage,
     ]);
@@ -120,7 +122,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
                   return msg;
                 });
 
-                setThreadMessages(threadId, updatedThread);
+                setThreadMessages(uid, threadId, updatedThread);
               } catch (err) {
                 console.error("JSON parsing error: ", err);
               }
@@ -137,7 +139,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
             role: "assistant",
             text: "문제가 생겼습니다. 다시 시도해주세요",
           };
-          setThreadMessages(threadId, [...updatedMessages, errorMsg]);
+          setThreadMessages(uid, threadId, [...updatedMessages, errorMsg]);
         }
       } finally {
         setInput("");

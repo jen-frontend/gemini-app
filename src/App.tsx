@@ -11,13 +11,14 @@ import { ToastContainer } from "react-toastify";
 import TestFirestorePage from "./pages/TestFirestorePage";
 import useAuth from "./hooks/useAuth";
 import PrivateRoute from "./components/PrivateRoute";
+import Spinner from "./components/Spinner/Spinner";
 
 const App: React.FC = () => {
   const { user, loading } = useAuth();
   return (
     <main>
       {loading ? (
-        <div>loading</div>
+        <Spinner />
       ) : (
         <Router>
           <Routes>

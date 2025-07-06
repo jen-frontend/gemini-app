@@ -7,6 +7,7 @@ import {
   getLatestChatThreads,
   subscribeToChatThreads,
 } from "../../firestoreUtils";
+import useAuth from "../../hooks/useAuth";
 
 interface ChatThread {
   id: number;
@@ -20,11 +21,13 @@ export default function Sidebar() {
   const { id } = useParams<{ id: string }>();
   const currentId = parseInt(id ?? "");
   const currentPath = useLocation();
+  const { uid } = useAuth();
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
   useEffect(() => {
-    const unsubscribe = subscribeToChatThreads((threads) => {
+    if (!uid) return;
+    const unsubscribe = subscribeToChatThreads(uid, (threads) => {
       // 최신 5개 가져오기
       const latestThreads = getLatestChatThreads(threads);
       // setChatList에 저장하기
@@ -32,7 +35,7 @@ export default function Sidebar() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [uid]);
 
   return (
     <div className={cn(styles.sidebar, { [styles.collapsed]: isCollapsed })}>

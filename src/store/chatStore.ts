@@ -5,6 +5,7 @@ export interface Message {
   id: number;
   role: "user" | "assistant";
   text: string;
+  uid: string;
 }
 
 interface ChatState {
@@ -12,7 +13,11 @@ interface ChatState {
   messages: Message[];
   threads: Record<number, Message[]>;
   addMessage: (message: Message) => void;
-  setThreadMessages: (threadId: number, messages: Message[]) => void;
+  setThreadMessages: (
+    uid: string,
+    threadId: number,
+    messages: Message[]
+  ) => void;
   setLoading: (loading: boolean) => void;
   setThreads: (threads: Record<number, Message[]>) => void;
 }
@@ -23,10 +28,10 @@ export const useChatStore = create<ChatState>((set) => ({
   threads: {},
   addMessage: (message: Message) =>
     set((state) => ({ messages: [...state.messages, message] })),
-  setThreadMessages: (threadId: number, messages: Message[]) =>
+  setThreadMessages: (uid: string, threadId: number, messages: Message[]) =>
     set((state) => {
       const updateThreads = { ...state.threads, [threadId]: messages };
-      saveThreadMessages(threadId, messages);
+      saveThreadMessages(uid, threadId, messages);
       return { threads: updateThreads };
     }),
   setLoading: (loading: boolean) => set({ loading }),

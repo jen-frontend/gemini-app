@@ -8,21 +8,24 @@ import * as styles from "./Page.module.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { subscribeToChatThreads } from "../firestoreUtils";
 import { useChatStore } from "../store/chatStore";
+import useAuth from "../hooks/useAuth";
 
 const ChatDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const threadId = parseInt(id ?? "");
   const { setThreads } = useChatStore();
   const navigate = useNavigate();
+  const { uid } = useAuth();
 
   // chatThreads 컬렉션 전체 구독
   useEffect(() => {
-    const unsubscribe = subscribeToChatThreads((threads) => {
+    if (!uid) return;
+    const unsubscribe = subscribeToChatThreads(uid, (threads) => {
       setThreads(threads);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [uid]);
 
   useEffect(() => {
     if (isNaN(threadId) || threadId === 0) {

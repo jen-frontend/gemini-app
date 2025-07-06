@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import * as styles from "./Auth.module.css";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -21,22 +22,41 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const handleClickSignup = () => {
+    navigate("/signup");
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>로그인</h1>
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <h1 className={styles.title}>로그인</h1>
       <input
         type="email"
         placeholder="이메일"
         onChange={(e) => setEmail(e.target.value)}
         value={email}
+        className={styles.formInput}
       />
       <input
         type="password"
         placeholder="비밀번호 (최소 8자리)"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        className={styles.formInput}
       />
-      <button type="submit">로그인</button>
+      <button
+        type="submit"
+        disabled={!email && !password}
+        className={styles.primaryBtn}
+      >
+        로그인
+      </button>
+      <button
+        type="button"
+        onClick={handleClickSignup}
+        className={styles.secondaryBtn}
+      >
+        회원가입
+      </button>
     </form>
   );
 };

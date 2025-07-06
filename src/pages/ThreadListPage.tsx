@@ -7,18 +7,21 @@ import {
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header";
 import ThreadList from "../components/ThreadList/ThreadList";
+import useAuth from "../hooks/useAuth";
 
 const ThreadListPage: React.FC = () => {
+  const { uid } = useAuth();
   const [threadList, setThreadList] = useState<ThreadListItem[]>([]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToChatThreads((threads) => {
+    if (!uid) return;
+    const unsubscribe = subscribeToChatThreads(uid, (threads) => {
       const allThreads = getAllChatThreads(threads);
       setThreadList(allThreads);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [uid]);
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>

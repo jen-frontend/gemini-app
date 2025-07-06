@@ -9,20 +9,27 @@ import {
 } from "firebase/firestore";
 
 export async function saveThreadMessages(
+  uid: string,
   threadId: number,
   messages: Message[]
 ) {
   // 저장할 firestore doc ref 정의
-  const threadDocRef = doc(db, "chatThreads", String(threadId));
+  const threadDocRef = doc(db, "chatThreads", uid, "threads", String(threadId));
   // setDoc으로 실제 데이터 저장
   await setDoc(threadDocRef, { messages }, { merge: true });
 }
 
 // 모든 chatThread 컬렉션 실시간 구독
 export const subscribeToChatThreads = (
+  uid: string,
   callback: (threads: Record<number, Message[]>) => void
 ) => {
-  const colRef = collection(db, "chatThreads");
+  if (!uid) {
+    throw new Error("유효한 uid가 필요합니다.");
+  }
+
+  // uid 있을 경우 "chatThreads/{uid}/threads" 경로 구독
+  const colRef = collection(db, "chatThreads", uid, "threads");
   const unsubscribe = onSnapshot(colRef, (snapshot) => {
     const threads: Record<number, Message[]> = {};
     snapshot.forEach((doc) => {
@@ -44,6 +51,7 @@ export const getLatestChatThreads = (
     .map(([id, msg]) => ({
       id: Number(id),
       title: msg.find((m) => m.role === "user")?.text || "Untitled Chat",
+      uid: msg.find((m) => m.role == "user")?.uid || "",
     }))
     .sort((a, b) => b.id - a.id)
     .slice(0, 5);
@@ -52,8 +60,11 @@ export const getLatestChatThreads = (
 };
 
 // 새로운 스레드 아이디 계산
-export async function getNextThreadId(): Promise<number> {
-  const snapshot = await getDocs(collection(db, "chatThreads"));
+export async function getNextThreadId(uid: string): Promise<number> {
+  if (!uid) {
+    throw new Error("유효한 uid가 필요합니다.");
+  }
+  const snapshot = await getDocs(collection(db, "chatThreads", uid, "threads"));
 
   const ids = snapshot.docs
     .map((doc) => Number(doc.id))
@@ -79,16 +90,18 @@ export const getAllChatThreads = (
 
       let question = "";
       let answer = "";
+      let uid = "";
 
       if (msgs.length > 0) {
         const userMsg = msgs.find((msg) => msg.role === "user");
         question = userMsg?.text ?? "질문이 없습니다";
+        uid: userMsg?.uid || "";
 
         const assistantMsg = msgs.find((msg) => msg.role === "assistant");
         answer = assistantMsg?.text ?? "답변이 없습니다";
       }
 
-      return { id, question, answer };
+      return { id, question, answer, uid };
     })
     .filter((item) => item !== null)
     .sort((a, b) => b!.id - a!.id);
