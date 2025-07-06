@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import * as styles from "./Sidebar.module.css";
 import { AiOutlineMenu } from "react-icons/ai";
 import cn from "classnames";
@@ -9,6 +9,7 @@ import {
 } from "../../firestoreUtils";
 import useAuth from "../../hooks/useAuth";
 import { useModalStore } from "../../store/modalStore";
+import useIsMobile from "../../hooks/useIsMobile";
 
 interface ChatThread {
   id: number;
@@ -24,6 +25,7 @@ export default function Sidebar() {
   const currentId = parseInt(id ?? "");
   const currentPath = useLocation();
   const { uid } = useAuth();
+  const isMobile = useIsMobile();
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
@@ -38,6 +40,14 @@ export default function Sidebar() {
 
     return () => unsubscribe();
   }, [uid]);
+
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(true);
+    }
+  }, [isMobile]);
+
+  console.log(isMobile, "<<<isMobile");
 
   return (
     <div className={cn(styles.sidebar, { [styles.collapsed]: isCollapsed })}>

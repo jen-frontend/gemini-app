@@ -38,3 +38,9 @@
   text-overflow: ellipsis;
   line-clamp: 2;
 }
+
+@media screen and (max-width: 600px) {
+  .container {
+    box-sizing: border-box;
+  }
+}

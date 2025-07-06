@@ -55,3 +55,9 @@
   width: 20px;
   height: 20px;
 }
+
+@media screen and (max-width: 600px) {
+  .chatInputWrapper {
+    width: 100%;
+  }
+}

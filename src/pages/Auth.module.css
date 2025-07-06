@@ -66,3 +66,15 @@
 .secondaryBtn:hover {
   background: rgb(86, 86, 86);
 }
+
+@media screen and (max-width: 600px) {
+  .form {
+    max-width: 400px;
+    margin: 160px auto;
+    padding-top: 30vh;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 32px;
+    background-color: #282a2c;
+  }
+}

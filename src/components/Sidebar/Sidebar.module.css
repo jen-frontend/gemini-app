@@ -1,5 +1,5 @@
 .sidebar {
-  width: 240px;
+  width: 200px;
   background-color: #282a2c;
   padding: 14px;
   font-size: 16px;
@@ -57,4 +57,33 @@
 .menuIcon {
   width: 18px;
   height: 18px;
+}
+
+@media screen and (max-width: 600px) {
+  .sidebar {
+    position: fixed !important;
+    height: 100%;
+    z-index: 100;
+    width: 100%;
+    box-sizing: border-box;
+
+    background-color: #282a2c;
+    padding: 18px;
+    font-size: 16px;
+    overflow: hidden;
+
+    padding: 10px;
+  }
+
+  .collapsed {
+    width: 64px;
+    height: 64px;
+    box-sizing: border-box;
+    background-color: transparent !important;
+  }
+
+  .menuIcon {
+    width: 16px;
+    height: 16px;
+  }
 }
