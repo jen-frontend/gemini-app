@@ -12,6 +12,7 @@ import TestFirestorePage from "./pages/TestFirestorePage";
 import useAuth from "./hooks/useAuth";
 import PrivateRoute from "./components/PrivateRoute";
 import Spinner from "./components/Spinner/Spinner";
+import Modal from "./components/Modal/Modal";
 
 const App: React.FC = () => {
   const { user, loading } = useAuth();
@@ -56,6 +57,7 @@ const App: React.FC = () => {
         draggable={false}
         closeOnClick={false}
       />
+      <Modal />
     </main>
   );
 };

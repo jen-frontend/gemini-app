@@ -8,6 +8,7 @@ import {
   subscribeToChatThreads,
 } from "../../firestoreUtils";
 import useAuth from "../../hooks/useAuth";
+import { useModalStore } from "../../store/modalStore";
 
 interface ChatThread {
   id: number;
@@ -16,6 +17,7 @@ interface ChatThread {
 
 export default function Sidebar() {
   const [chatList, setChatList] = useState<ChatThread[]>([]);
+  const { openModal } = useModalStore();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -76,7 +78,9 @@ export default function Sidebar() {
               {item?.title}
             </div>
           ))}
-          <div className={styles.navItem}>Profile</div>
+          <div className={styles.navItem} onClick={openModal}>
+            Profile
+          </div>
         </>
       )}
     </div>

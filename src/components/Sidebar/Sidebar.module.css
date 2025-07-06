@@ -33,7 +33,7 @@
 }
 
 .collapsed {
-  width: 54px;
+  width: 48px;
 }
 
 .menuButton {
@@ -41,6 +41,17 @@
   cursor: pointer;
   transition: background-color 0.3s;
   cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.collapsed .menuButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .menuIcon {
