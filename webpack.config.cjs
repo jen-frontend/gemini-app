@@ -1,9 +1,10 @@
+const path = require("path");
 const dotenv = require("dotenv");
 const webpack = require("webpack");
-
-const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
+// production 환경에서는 Vercel 환경 변수(process.env)가 이미 설정되어 있습니다.
+// 필요하다면 로컬 .env 파일의 값과 결합할 수도 있습니다.
 dotenv.config();
 
 const envKeys = Object.keys(process.env).reduce((prev, next) => {
@@ -12,14 +13,18 @@ const envKeys = Object.keys(process.env).reduce((prev, next) => {
 }, {});
 
 module.exports = {
-  entry: "./src/index.tsx",
+  mode: process.env.NODE_ENV || "development",
+  entry: "./src/index.tsx", // 진입점 파일을 tsx로 설정
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
-    publicPath: "/",
+    publicPath: "/", // 여기서 절대 경로를 지정
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
+    fallback: {
+      process: require.resolve("process"),
+    },
   },
   module: {
     rules: [
@@ -28,7 +33,6 @@ module.exports = {
         exclude: /node_modules/,
         use: "babel-loader",
       },
-      // module css 활성화 및 스타일링 관련 설정
       {
         test: /\.css$/,
         use: [
@@ -46,6 +50,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./public/index.html",
+    }),
+    new webpack.ProvidePlugin({
+      process: "process",
     }),
     new webpack.DefinePlugin(envKeys),
   ],
